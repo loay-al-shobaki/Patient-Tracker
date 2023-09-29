@@ -1,5 +1,6 @@
 package com.example.patienttracker.presentation.patientListScreen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,18 +28,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.patienttracker.presentation.domain.model.Patient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientListScreen(
     onFabClicked: () -> Unit,
-    onItemClicked: (Int?) -> Unit
+    onItemClicked: (Int?) -> Unit,
+    viewmodel: PatientListViewModel = hiltViewModel()
 ) {
-    val patient1 = Patient("John Doe", "30", 1, "Dr. Smith", "Medicine A")
-    val patient2 = Patient("loay Doe", "20", 2, "Dr. Smith", "Medicine A")
-    val list = listOf(patient1, patient2)
 
+    val patientList by viewmodel.patientList.collectAsState()
     Scaffold(
         topBar = { ListAppBar() },
         floatingActionButton = {
@@ -50,16 +53,18 @@ fun PatientListScreen(
                 .padding(top = 64.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(list) { patient ->
+            items(patientList) { patient ->
                 PationtItem(
                     patient = patient,
-                    onItemClick = { onItemClicked(patient.patienId) },
-                    onDeleteConfirm = {}
+                    onItemClick = { onItemClicked(patient.patienId)
+
+                                  },
+                    onDeleteConfirm = { viewmodel.deletePatient(patient) }
                 )
 
             }
         }
-        if (list.isEmpty()) {
+        if (patientList.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -104,9 +109,11 @@ fun ListFloatinActionButton(
     onFabClicked: () -> Unit
 ) {
     FloatingActionButton(
-        onClick =  onFabClicked
+        onClick = onFabClicked
     ) {
         Icon(imageVector = Icons.Filled.Add, contentDescription = "Add  Patient Button")
     }
 
 }
+
+

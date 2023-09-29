@@ -1,5 +1,6 @@
 package com.example.patienttracker.presentation.patientDetials
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,17 +33,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientDetailesScreen(
-    viewModel: PatientDetailsViewModel,
+    viewModel: PatientDetailsViewModel = hiltViewModel(),
     onBackCliked: () -> Unit,
-    onSuccessfulSaving: () -> Unit
+    onSuccessfullySaving: () -> Unit
 ) {
 
     Scaffold(
@@ -52,6 +56,22 @@ fun PatientDetailesScreen(
     ) {
 
         val focusRequester = remember { FocusRequester() }
+
+        val context = LocalContext.current
+
+        LaunchedEffect(key1 = Unit) {
+            viewModel.eventFlow.collectLatest { event ->
+                when(event) {
+                    PatientDetailsViewModel.UiEvent.SaveNote -> {
+                        onSuccessfullySaving()
+                        Toast.makeText(context, "Successfully Save", Toast.LENGTH_SHORT).show()
+                    }
+                    is PatientDetailsViewModel.UiEvent.ShowToast -> {
+                        Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
 
         LaunchedEffect(key1 = Unit) {
             delay(500)
@@ -144,7 +164,10 @@ fun PatientDetailesScreen(
             Spacer(modifier = Modifier.height(10.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { }
+                onClick = {
+                    viewModel.onEvent(PatientDetailsEvents.SaveButton)
+
+                }
             ) {
                 Text(
                     text = "Save",

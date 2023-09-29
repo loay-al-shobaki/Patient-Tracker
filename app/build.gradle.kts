@@ -91,4 +91,7 @@ dependencies {
     //System Ui Color
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.29.1-alpha")
 
+    // lifecycleScope:
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-alpha04")
+
 }
