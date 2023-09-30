@@ -107,7 +107,7 @@ class PatientDetailsViewModel @Inject constructor(
 
             viewModelScope.launch {
                 val existingPatient = currentPatientId?.let { repository.getPatientById(it) }
-g
+
                 if (existingPatient != null) {
                     viewModelScope.launch {
                         repository.deletePatient(existingPatient)
