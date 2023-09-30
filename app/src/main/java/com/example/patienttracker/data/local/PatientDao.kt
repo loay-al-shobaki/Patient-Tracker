@@ -2,6 +2,7 @@ package com.example.patienttracker.data.local
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.patienttracker.presentation.domain.model.Patient
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PatientDao{
-    @Upsert
+    @Upsert()
      fun addOrUpdatePatient(patient: Patient)
 
     @Delete

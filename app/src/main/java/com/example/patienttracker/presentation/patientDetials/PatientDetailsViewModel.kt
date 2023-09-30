@@ -31,6 +31,7 @@ class PatientDetailsViewModel @Inject constructor(
         fetchPatientDetails()
         Log.d("loay", "${currentPatientId}: ")
     }
+
     fun onEvent(event: PatientDetailsEvents) {
         when (event) {
             is PatientDetailsEvents.EnteredAge -> {
@@ -52,6 +53,7 @@ class PatientDetailsViewModel @Inject constructor(
             PatientDetailsEvents.SaveButton -> {
                 viewModelScope.launch {
                     try {
+                        deleteOldPatient()
                         savePatient()
                         _eventFlow.emit(UiEvent.SaveNote)
                     } catch (e: Exception) {
@@ -99,11 +101,28 @@ class PatientDetailsViewModel @Inject constructor(
             )
         }
     }
+
+    private fun deleteOldPatient() {
+        savedStateHandle.get<Int>(key = PATIENT_DETALIS_KEY)?.let { patientId ->
+
+            viewModelScope.launch {
+                val existingPatient = currentPatientId?.let { repository.getPatientById(it) }
+
+                if (existingPatient != null) {
+                    viewModelScope.launch {
+                        repository.deletePatient(existingPatient)
+                    }
+                }
+            }
+        }
+    }
+
     private fun fetchPatientDetails() {
         savedStateHandle.get<Int>(key = PATIENT_DETALIS_KEY)?.let { patientId ->
             Log.d("loay2", "${currentPatientId}: ")
             if (patientId != -1) {
                 viewModelScope.launch {
+
                     repository.getPatientById(patientId)?.apply {
                         state = state.copy(
                             name = name,
@@ -119,12 +138,12 @@ class PatientDetailsViewModel @Inject constructor(
             }
         }
     }
+
     sealed class UiEvent {
         data class ShowToast(val message: String) : UiEvent()
         object SaveNote : UiEvent()
     }
 }
-
 
 
 class TextFieldException(message: String?) : Exception(message)
